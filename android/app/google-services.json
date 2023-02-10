@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "845609043062",
+    "project_id": "kit-ocr",
+    "storage_bucket": "kit-ocr.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:845609043062:android:9360544a7999cbf312cb57",
+        "android_client_info": {
+          "package_name": "com.example.kitocr"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "845609043062-m7tt1rel82jldpj0n8dkgbcrc9c8466g.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDY0WDaEa6oqsuM8ESxDVSb5rVBwlH1nbc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "845609043062-m7tt1rel82jldpj0n8dkgbcrc9c8466g.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
