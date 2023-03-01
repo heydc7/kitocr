@@ -43,6 +43,7 @@ dependencies:
   google_ml_kit: ^0.13.0
   image_picker: ^0.8.6
   dropdown_plus: ^0.0.9
+  firebase_storage: ^11.0.14
 
 dev_dependencies:
   flutter_test:

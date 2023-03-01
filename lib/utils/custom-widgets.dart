@@ -89,12 +89,13 @@ Container reusableButton(BuildContext context, String title, Function onTap) {
   );
 }
 
-Autocomplete reusableAutocomplete(List<String> items, Function(String) onChanged) {
+Autocomplete reusableAutocomplete(List<String> items, TextEditingController controller, Function(String) onChanged) {
   return Autocomplete<String>(
     optionsBuilder: (TextEditingValue textEditingValue) {
       return items.where((element) => element.toLowerCase().startsWith(textEditingValue.text.toLowerCase())).toList();
     },
     fieldViewBuilder: (BuildContext context, TextEditingController fieldTextEditingController, FocusNode fieldFocusNode, VoidCallback onFieldSubmitted) {
+      fieldTextEditingController = controller;
       return TextField(
         controller: fieldTextEditingController,
         focusNode: fieldFocusNode,

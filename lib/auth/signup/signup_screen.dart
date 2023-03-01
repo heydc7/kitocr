@@ -23,6 +23,8 @@ class _SignupScreenState extends State<SignupScreen> {
   TextEditingController _mobileTextController = TextEditingController();
   TextEditingController _passTextController = TextEditingController();
 
+  final usersRef = FirebaseFirestore.instance.collection('users');
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -57,6 +59,7 @@ class _SignupScreenState extends State<SignupScreen> {
                 reusableTextField("Mobile Number", Icons.phone, false, _mobileTextController),
                 SizedBox(height: 24,),
                 reusableTextField("Enter Password", Icons.lock_outline, true, _passTextController),
+                SizedBox(height: 24,),
                 authButton(context, false, () {
                   var name = _nameTextController.text;
                   var email = _emailTextController.text;
@@ -82,13 +85,12 @@ class _SignupScreenState extends State<SignupScreen> {
   }
 
   Future createUser({required String id, required String name, required String email, required String mobile}) async {
-    final usersRef = FirebaseFirestore.instance.collection('users');
     final user = EndUser(id: id, name: name, email: email, mobile: mobile);
-    await usersRef.add(user.toJson()).then((value) {
+    await usersRef.doc(id).set(user.toJson()).then((value) {
       showSnakbar("Signup successful, Welcome!");
       Navigator.push(context, MaterialPageRoute(builder: (context) => HomeScreen()));
     }).onError((error, stackTrace) {
-      showSnakbar("Signup error: ${error.toString()}");
+      showSnakbar("Create User error: ${error.toString()}");
       print("Error creating profile: ${error}");
     });
   }
