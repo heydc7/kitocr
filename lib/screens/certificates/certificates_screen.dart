@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:kitocr/models/certificate.dart';
 import 'package:kitocr/screens/Details/detail_screen.dart';
@@ -12,6 +13,7 @@ class CertificatesScreen extends StatefulWidget {
 
 class _CertificatesScreenState extends State<CertificatesScreen> {
 
+  final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
 
   @override
   Widget build(BuildContext context) {
@@ -24,10 +26,11 @@ class _CertificatesScreenState extends State<CertificatesScreen> {
         body: Container(
           margin: EdgeInsets.all(16),
           child: StreamBuilder(
-            stream: FirebaseFirestore.instance.collection('certificates').snapshots(),
+            stream: FirebaseFirestore.instance.collection('certificates').where('userId', isEqualTo: firebaseAuth.currentUser?.uid).snapshots(),
             builder: (context, snapshot) {
               if(snapshot.hasData) {
                 List<Map>? items = snapshot.data?.docs.map((e) => e.data() as Map).toList();
+
                 return ListView.builder(
                   itemCount: items?.length,
                   itemBuilder: (context, index){

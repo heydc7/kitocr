@@ -210,8 +210,6 @@ class _HomeScreenState extends State<HomeScreen> {
     Navigator.push(context, MaterialPageRoute(builder: (context) => ReviewScreen(image: image, ocrText: ocrText, scannedText: scannedText)));
   }
 
-
-
 }
 
 

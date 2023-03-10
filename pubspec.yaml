@@ -44,6 +44,7 @@ dependencies:
   image_picker: ^0.8.6
   dropdown_plus: ^0.0.9
   firebase_storage: ^11.0.14
+  simple_autocomplete_formfield: ^0.3.0
 
 dev_dependencies:
   flutter_test:

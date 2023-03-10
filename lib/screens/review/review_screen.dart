@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:kitocr/models/certificate.dart';
@@ -7,7 +8,7 @@ import 'package:kitocr/utils/custom-widgets.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-
+import 'package:simple_autocomplete_formfield/simple_autocomplete_formfield.dart';
 import '../home/home_screen.dart';
 
 class ReviewScreen extends StatefulWidget {
@@ -33,21 +34,23 @@ class _ReviewScreenState extends State<ReviewScreen> {
   var eventName = "";
   var hostName = "";
   var date = "";
+  var days = "";
 
   final certTypes = ["Participation", "Appreciation", "Achievement", "Excellence", "Award", "Recognition", "Completion", "Other"];
 
-  final typeController = TextEditingController();
-  final recipientController = TextEditingController();
-  final eventController = TextEditingController();
-  final hostController = TextEditingController();
-  final dateController = TextEditingController();
-
   final certificatesRef = FirebaseFirestore.instance.collection('certificates');
+  final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
+
+  final group1 = ["This is to certify that"];
+  final group2 = ["has participated in"];
+  final group3 = ["organized by"];
+  final group4 = ["from"];
 
   @override
   void initState() {
     super.initState();
     analyzeText(widget.ocrText, widget.scannedText);
+    print(widget.scannedText);
   }
 
   @override
@@ -88,18 +91,32 @@ class _ReviewScreenState extends State<ReviewScreen> {
                   ),
                 ),
                 Text(widget.ocrText),
-                SizedBox(height: 16,),
+                SizedBox(height: 16),
                 Padding(
                   padding: EdgeInsets.symmetric(vertical: 8, horizontal: 4),
                   child: Text("Type of certificate",
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                 ),
-                reusableAutocomplete(certTypes, typeController, (value) {
-                  setState(() {
-                    certificateType = value;
-                  });
-                }),
+                SimpleAutocompleteFormField<String>(
+                  initialValue: certificateType,
+                  decoration: InputDecoration(border: OutlineInputBorder()),
+                  itemBuilder: (context, item) => Container(
+                    padding: EdgeInsets.all(8),
+                    margin: EdgeInsets.symmetric(vertical: 4),
+                    decoration: BoxDecoration(
+                      color: Colors.black12,
+                      borderRadius: BorderRadius.circular(12)
+                    ),
+                    child: Text(item!),
+                  ),
+                  maxSuggestions: 20,
+                  suggestionsHeight: 250,
+                  onSearch: (String search) async => search.isEmpty ? certTypes : certTypes.where((txt) => txt.toLowerCase().contains(search.toLowerCase())).toList(),
+                  itemFromString: (string) => certTypes.singleWhere((txt) => txt == string.toLowerCase(), orElse: () => ''),
+                  onChanged: (value) => setState(() => certificateType = value!),
+                  onSaved: (value) => setState(() => certificateType = value!)
+                ),
                 SizedBox(height: 16,),
                 Padding(
                   padding: EdgeInsets.symmetric(vertical: 8, horizontal: 4),
@@ -107,11 +124,25 @@ class _ReviewScreenState extends State<ReviewScreen> {
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                 ),
-                reusableAutocomplete(ocrOptions, recipientController, (value) {
-                  setState(() {
-                    certificateType = value;
-                  });
-                }),
+                SimpleAutocompleteFormField<String>(
+                    initialValue: recipient,
+                    decoration: InputDecoration(border: OutlineInputBorder()),
+                    itemBuilder: (context, item) => Container(
+                      padding: EdgeInsets.all(8),
+                      margin: EdgeInsets.symmetric(vertical: 4),
+                      decoration: BoxDecoration(
+                          color: Colors.black12,
+                          borderRadius: BorderRadius.circular(12)
+                      ),
+                      child: Text(item!),
+                    ),
+                    maxSuggestions: 20,
+                    suggestionsHeight: 300,
+                    onSearch: (String search) async => search.isEmpty ? widget.scannedText : widget.scannedText.where((txt) => txt.toLowerCase().contains(search.toLowerCase())).toList(),
+                    itemFromString: (string) => widget.scannedText.singleWhere((txt) => txt == string.toLowerCase(), orElse: () => ''),
+                    onChanged: (value) => setState(() => recipient = value!),
+                    onSaved: (value) => setState(() => recipient = value!)
+                ),
                 SizedBox(height: 16,),
                 Padding(
                   padding: EdgeInsets.symmetric(vertical: 8, horizontal: 4),
@@ -119,11 +150,25 @@ class _ReviewScreenState extends State<ReviewScreen> {
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                 ),
-                reusableAutocomplete(ocrOptions, eventController, (value) {
-                  setState(() {
-                    certificateType = value;
-                  });
-                }),
+                SimpleAutocompleteFormField<String>(
+                    initialValue: eventName,
+                    decoration: InputDecoration(border: OutlineInputBorder()),
+                    itemBuilder: (context, item) => Container(
+                      padding: EdgeInsets.all(8),
+                      margin: EdgeInsets.symmetric(vertical: 4),
+                      decoration: BoxDecoration(
+                          color: Colors.black12,
+                          borderRadius: BorderRadius.circular(12)
+                      ),
+                      child: Text(item!),
+                    ),
+                    maxSuggestions: 30,
+                    suggestionsHeight: 300,
+                    onSearch: (String search) async => search.isEmpty ? widget.scannedText : widget.scannedText.where((txt) => txt.toLowerCase().contains(search.toLowerCase())).toList(),
+                    itemFromString: (string) => widget.scannedText.singleWhere((txt) => txt == string.toLowerCase(), orElse: () => ''),
+                    onChanged: (value) => setState(() => eventName = value!),
+                    onSaved: (value) => setState(() => eventName = value!)
+                ),
                 SizedBox(height: 16,),
                 Padding(
                   padding: EdgeInsets.symmetric(vertical: 8, horizontal: 4),
@@ -131,11 +176,25 @@ class _ReviewScreenState extends State<ReviewScreen> {
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                 ),
-                reusableAutocomplete(ocrOptions, hostController, (value) {
-                  setState(() {
-                    certificateType = value;
-                  });
-                }),
+                SimpleAutocompleteFormField<String>(
+                    initialValue: hostName,
+                    decoration: InputDecoration(border: OutlineInputBorder()),
+                    itemBuilder: (context, item) => Container(
+                      padding: EdgeInsets.all(8),
+                      margin: EdgeInsets.symmetric(vertical: 4),
+                      decoration: BoxDecoration(
+                          color: Colors.black12,
+                          borderRadius: BorderRadius.circular(12)
+                      ),
+                      child: Text(item!),
+                    ),
+                    maxSuggestions: 30,
+                    suggestionsHeight: 300,
+                    onSearch: (String search) async => search.isEmpty ? widget.scannedText : widget.scannedText.where((txt) => txt.toLowerCase().contains(search.toLowerCase())).toList(),
+                    itemFromString: (string) => widget.scannedText.singleWhere((txt) => txt == string.toLowerCase(), orElse: () => ''),
+                    onChanged: (value) => setState(() => hostName = value!),
+                    onSaved: (value) => setState(() => hostName = value!)
+                ),
                 SizedBox(height: 16,),
                 Padding(
                   padding: EdgeInsets.symmetric(vertical: 8, horizontal: 4),
@@ -143,11 +202,51 @@ class _ReviewScreenState extends State<ReviewScreen> {
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                 ),
-                reusableAutocomplete(ocrOptions, dateController, (value) {
-                  setState(() {
-                    certificateType = value;
-                  });
-                }),
+                SimpleAutocompleteFormField<String>(
+                    initialValue: date,
+                    decoration: InputDecoration(border: OutlineInputBorder()),
+                    itemBuilder: (context, item) => Container(
+                      padding: EdgeInsets.all(8),
+                      margin: EdgeInsets.symmetric(vertical: 4),
+                      decoration: BoxDecoration(
+                          color: Colors.black12,
+                          borderRadius: BorderRadius.circular(12)
+                      ),
+                      child: Text(item!),
+                    ),
+                    maxSuggestions: 30,
+                    suggestionsHeight: 300,
+                    onSearch: (String search) async => search.isEmpty ? widget.scannedText : widget.scannedText.where((txt) => txt.toLowerCase().contains(search.toLowerCase())).toList(),
+                    itemFromString: (string) => widget.scannedText.singleWhere((txt) => txt == string.toLowerCase(), orElse: () => ''),
+                    onChanged: (value) => setState(() => date = value!),
+                    onSaved: (value) => setState(() => date = value!)
+                ),
+                SizedBox(height: 16,),
+                Padding(
+                  padding: EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+                  child: Text("Days",
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                ),
+                SimpleAutocompleteFormField<String>(
+                    initialValue: days,
+                    decoration: InputDecoration(border: OutlineInputBorder()),
+                    itemBuilder: (context, item) => Container(
+                      padding: EdgeInsets.all(8),
+                      margin: EdgeInsets.symmetric(vertical: 4),
+                      decoration: BoxDecoration(
+                          color: Colors.black12,
+                          borderRadius: BorderRadius.circular(12)
+                      ),
+                      child: Text(item!),
+                    ),
+                    maxSuggestions: 30,
+                    suggestionsHeight: 300,
+                    onSearch: (String search) async => search.isEmpty ? widget.scannedText : widget.scannedText.where((txt) => txt.toLowerCase().contains(search.toLowerCase())).toList(),
+                    itemFromString: (string) => widget.scannedText.singleWhere((txt) => txt == string.toLowerCase(), orElse: () => ''),
+                    onChanged: (value) => setState(() => days = value!),
+                    onSaved: (value) => setState(() => days = value!)
+                ),
                 SizedBox(height: 16,),
                 Padding(
                   padding: EdgeInsets.symmetric(vertical: 8, horizontal: 4),
@@ -172,11 +271,12 @@ class _ReviewScreenState extends State<ReviewScreen> {
     Reference refRoot = FirebaseStorage.instance.ref();
     Reference refDir = refRoot.child('images');
     Reference refImgUpload = refDir.child(uniqueFileName);
+    final uId = firebaseAuth.currentUser?.uid;
 
     try {
       await refImgUpload.putFile(File(widget.image.path));
       var imgUrl = await refImgUpload.getDownloadURL();
-      var certificate = Certificate(ocrText: widget.ocrText, type: typeController.text, recipient: recipientController.text, event: eventController.text, host: hostController.text, date: dateController.text, imgUrl: imgUrl);
+      var certificate = Certificate(userId: uId ?? "unknown", ocrText: widget.ocrText, type: certificateType, recipient: recipient, event: eventName, host: hostName, date: date, imgUrl: imgUrl, days: days);
 
       await certificatesRef.add(certificate.toJson()).then((value) {
         showSnakbar("Upload successful");
@@ -192,38 +292,71 @@ class _ReviewScreenState extends State<ReviewScreen> {
   }
 
   void analyzeText(String txt, List<String> items) {
-    int nameIndex =  items.indexWhere((element) => element.contains('certify that'));
-    if(nameIndex != -1) {
-      setState(() {
-        recipientController.text = items[nameIndex + 1];
-      });
-    }
-    int typeIndex =  items.indexWhere((element) => element.contains('certificate of'));
-    if(typeIndex != -1) {
-      setState(() {
-        typeController.text = items[typeIndex];
-      });
+
+    final ocrTxt = widget.ocrText;
+    var indexes = [];
+
+    for(final keyword in group1) {
+      if(ocrTxt.toLowerCase().contains(keyword.toLowerCase())) {
+        indexes.add("${ocrTxt.indexOf(keyword)}:${keyword.length}:1");
+        break;
+      }
+    };
+    for(final keyword in group2) {
+      if(ocrTxt.toLowerCase().contains(keyword.toLowerCase())) {
+        indexes.add("${ocrTxt.indexOf(keyword)}:${keyword.length}:2");
+        break;
+      }
+    };
+    for(final keyword in group3) {
+      if(ocrTxt.toLowerCase().contains(keyword.toLowerCase())) {
+        indexes.add("${ocrTxt.indexOf(keyword)}:${keyword.length}:3");
+        break;
+      }
+    };
+    for(final keyword in group4) {
+      if(ocrTxt.toLowerCase().contains(keyword.toLowerCase())) {
+        indexes.add("${ocrTxt.indexOf(keyword)}:${keyword.length}:4");
+        break;
+      }
+    };
+    indexes.add("${ocrTxt.length}:0");
+    indexes.sort();
+    print("Indexes: " + indexes.toString());
+
+    for(var i=0; i < indexes.length - 1; i++) {
+      var p1 = indexes[i].split(':');
+      var g = int.parse(p1[2]);
+      var p2 = indexes[i + 1].split(':');
+      var l = int.parse(p1[1]);
+      final startIndex = int.parse(p1[0]);
+      final endIndex = int.parse(p2[0]);
+      print("$g : ${ocrTxt.substring(startIndex + l, endIndex)}");
+      switch(g){
+        case 1:
+          recipient = ocrTxt.substring(startIndex + l, endIndex);
+          break;
+        case 2:
+          eventName = ocrTxt.substring(startIndex + l, endIndex);
+          break;
+        case 3:
+          hostName = ocrTxt.substring(startIndex + l, endIndex);
+          break;
+        case 4:
+          date = ocrTxt.substring(startIndex + l, endIndex);
+          break;
+      }
     }
 
-    int eventIndex =  items.indexWhere((element) => element.contains('participated'));
-    if(eventIndex != -1) {
-      setState(() {
-        eventController.text = items[eventIndex];
-      });
+    var items = ocrTxt.toLowerCase().split(' ');
+    if(items.contains('days')) {
+      var d = items[items.indexOf('days') - 1];
+      days = d;
     }
 
-    int hostIndex =  items.indexWhere((element) => element.contains('organized'));
-    if(hostIndex != -1) {
-      setState(() {
-        hostController.text = items[hostIndex];
-      });
-    }
-
-    int dateIndex =  items.indexWhere((element) => element.contains('from'));
-    if(dateIndex != -1) {
-      setState(() {
-        dateController.text = items[dateIndex + 1];
-      });
+    if(ocrTxt.toLowerCase().contains('certificate of')) {
+      var c = items[items.indexOf('certificate') + 2];
+      certificateType = c;
     }
   }
 
