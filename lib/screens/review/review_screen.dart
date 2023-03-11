@@ -8,6 +8,7 @@ import 'package:kitocr/utils/custom-widgets.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:nb_utils/nb_utils.dart';
 import 'package:simple_autocomplete_formfield/simple_autocomplete_formfield.dart';
 import '../home/home_screen.dart';
 
@@ -41,10 +42,16 @@ class _ReviewScreenState extends State<ReviewScreen> {
   final certificatesRef = FirebaseFirestore.instance.collection('certificates');
   final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
 
-  final group1 = ["This is to certify that"];
-  final group2 = ["has participated in"];
+  // NAME
+  final group1 = ["certify that"];
+  // EVENT NAME
+  final group2 = ["has participated in", "has organized"];
+  // HOST NAME
   final group3 = ["organized by"];
+  // DATE
   final group4 = ["from"];
+
+  var isLoading = false;
 
   @override
   void initState() {
@@ -224,7 +231,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
                 SizedBox(height: 16,),
                 Padding(
                   padding: EdgeInsets.symmetric(vertical: 8, horizontal: 4),
-                  child: Text("Days",
+                  child: Text("Duration",
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                 ),
@@ -267,6 +274,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
   }
 
   void saveData() async {
+    buildShowDialog(context);
     String uniqueFileName = DateTime.now().millisecondsSinceEpoch.toString();
     Reference refRoot = FirebaseStorage.instance.ref();
     Reference refDir = refRoot.child('images');
@@ -280,6 +288,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
 
       await certificatesRef.add(certificate.toJson()).then((value) {
         showSnakbar("Upload successful");
+        Navigator.pop(context);
         Navigator.pop(context);
       }).onError((error, stackTrace) {
         showSnakbar("Upload error: ${error.toString()}");
@@ -298,30 +307,34 @@ class _ReviewScreenState extends State<ReviewScreen> {
 
     for(final keyword in group1) {
       if(ocrTxt.toLowerCase().contains(keyword.toLowerCase())) {
-        indexes.add("${ocrTxt.indexOf(keyword)}:${keyword.length}:1");
+        indexes.add("${ocrTxt.toLowerCase().indexOf(keyword)}:${keyword.length}:1");
         break;
       }
     };
     for(final keyword in group2) {
       if(ocrTxt.toLowerCase().contains(keyword.toLowerCase())) {
-        indexes.add("${ocrTxt.indexOf(keyword)}:${keyword.length}:2");
+        indexes.add("${ocrTxt.toLowerCase().indexOf(keyword)}:${keyword.length}:2");
         break;
       }
     };
     for(final keyword in group3) {
       if(ocrTxt.toLowerCase().contains(keyword.toLowerCase())) {
-        indexes.add("${ocrTxt.indexOf(keyword)}:${keyword.length}:3");
+        indexes.add("${ocrTxt.toLowerCase().indexOf(keyword)}:${keyword.length}:3");
         break;
       }
     };
     for(final keyword in group4) {
       if(ocrTxt.toLowerCase().contains(keyword.toLowerCase())) {
-        indexes.add("${ocrTxt.indexOf(keyword)}:${keyword.length}:4");
+        indexes.add("${ocrTxt.toLowerCase().indexOf(keyword)}:${keyword.length}:4");
         break;
       }
     };
-    indexes.add("${ocrTxt.length}:0");
-    indexes.sort();
+    indexes.add("${ocrTxt.length}:0:-1");
+    indexes.sort((a,b) {
+      var s1 = int.parse(a.split(':')[0]);
+      var s2 = int.parse(b.split(':')[0]);
+      return s1.compareTo(s2);
+    });
     print("Indexes: " + indexes.toString());
 
     for(var i=0; i < indexes.length - 1; i++) {
@@ -345,18 +358,27 @@ class _ReviewScreenState extends State<ReviewScreen> {
         case 4:
           date = ocrTxt.substring(startIndex + l, endIndex);
           break;
+        default:
+          print("Last Index");
       }
     }
 
     var items = ocrTxt.toLowerCase().split(' ');
     if(items.contains('days')) {
       var d = items[items.indexOf('days') - 1];
-      days = d;
+      days = d + ' Days';
+    } else if(items.contains('week')) {
+      var w = items[items.indexOf('week') - 1];
+      days = w + ' Week';
+    } else if(items.contains('months')) {
+      var m = items[items.indexOf('months') - 1];
+      days = m + ' Months';
     }
 
+    print("Items: $items");
     if(ocrTxt.toLowerCase().contains('certificate of')) {
       var c = items[items.indexOf('certificate') + 2];
-      certificateType = c;
+      certificateType = c.capitalizeFirstLetter();
     }
   }
 
@@ -372,5 +394,16 @@ class _ReviewScreenState extends State<ReviewScreen> {
 
   void hideSnakbar() {
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
+  }
+
+  buildShowDialog(BuildContext context) {
+    return showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return Center(
+            child: CircularProgressIndicator(),
+          );
+        });
   }
 }

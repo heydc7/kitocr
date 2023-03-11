@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:kitocr/auth/reset/reset_screen.dart';
 import 'package:kitocr/auth/signup/signup_screen.dart';
 import 'package:kitocr/utils/utils.dart';
 import 'package:nb_utils/nb_utils.dart';
@@ -66,7 +67,9 @@ class _LoginScreenState extends State<LoginScreen> {
                     showSnakbar("Please fill all required fields");
                   }
                 }),
-                signupOption()
+                signupOption(),
+                SizedBox(height: 16,),
+                forgetPassOption()
               ],
             ).paddingSymmetric(horizontal: 16)
           ),
@@ -82,6 +85,7 @@ class _LoginScreenState extends State<LoginScreen> {
         Text("Don't have account?",
           style: TextStyle(color: Colors.white70),
         ),
+        SizedBox(width: 8,),
         GestureDetector(
           onTap: () {
             Navigator.push(context,
@@ -91,6 +95,30 @@ class _LoginScreenState extends State<LoginScreen> {
           child: Text("Sign Up",
             style: TextStyle(
               color: Colors.white, fontWeight: FontWeight.bold
+            ),
+          ),
+        )
+      ],
+    );
+  }
+
+  Row forgetPassOption() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text("Forgot your password?",
+          style: TextStyle(color: Colors.white70),
+        ),
+        SizedBox(width: 8,),
+        GestureDetector(
+          onTap: () {
+            Navigator.push(context,
+                MaterialPageRoute(builder: (context) => ResetScreen())
+            );
+          },
+          child: Text("Reset",
+            style: TextStyle(
+                color: Colors.white, fontWeight: FontWeight.bold
             ),
           ),
         )

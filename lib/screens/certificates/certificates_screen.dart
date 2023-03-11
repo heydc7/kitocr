@@ -39,10 +39,12 @@ class _CertificatesScreenState extends State<CertificatesScreen> {
                       onTap: () {
                         Navigator.push(context, MaterialPageRoute(builder: (context) => DetailScreen(certificate: certificate)));
                       },
-                      child: ListTile(
-                        title: Text(certificate.recipient),
-                        subtitle: Text(certificate.host),
-                        leading: Image.network(certificate.imgUrl),
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(vertical: 16),
+                        child: ListTile(
+                          title: Text(certificate.recipient),
+                          leading: Image.network(certificate.imgUrl),
+                        ),
                       ),
                     );
                   }
