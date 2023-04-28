@@ -89,7 +89,7 @@ Container reusableButton(BuildContext context, String title, Function onTap) {
   );
 }
 
-Autocomplete reusableAutocomplete(List<String> items, TextEditingController controller, Function(String) onChanged) {
+Autocomplete reusableAutocomplete(List<String> items, TextEditingController controller, Function(String) onChanged, Function(String) onSubmit) {
   return Autocomplete<String>(
     optionsBuilder: (TextEditingValue textEditingValue) {
       return items.where((element) => element.toLowerCase().startsWith(textEditingValue.text.toLowerCase())).toList();
@@ -109,6 +109,7 @@ Autocomplete reusableAutocomplete(List<String> items, TextEditingController cont
           ),
         ),
         onChanged: onChanged,
+        onSubmitted: onSubmit,
       );
     },
     onSelected: onChanged,

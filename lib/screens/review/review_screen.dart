@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:kitocr/models/certificate.dart';
+import 'package:kitocr/models/end_user.dart';
 import 'package:kitocr/utils/custom-widgets.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -11,18 +12,21 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:simple_autocomplete_formfield/simple_autocomplete_formfield.dart';
 import '../home/home_screen.dart';
+import 'package:uuid/uuid.dart';
 
 class ReviewScreen extends StatefulWidget {
   const ReviewScreen({
     Key? key,
     required this.image,
     required this.ocrText,
-    required this.scannedText
+    required this.scannedText,
+    required this.kitUsr
   }) : super(key: key);
 
   final XFile image;
   final String ocrText;
   final List<String> scannedText;
+  final EndUser kitUsr;
 
   @override
   State<ReviewScreen> createState() => _ReviewScreenState();
@@ -30,12 +34,13 @@ class ReviewScreen extends StatefulWidget {
 
 class _ReviewScreenState extends State<ReviewScreen> {
 
-  var certificateType = "";
-  var recipient = "";
-  var eventName = "";
-  var hostName = "";
-  var date = "";
-  var days = "";
+  TextEditingController certificateTypeTextController = TextEditingController();
+  TextEditingController recipientTextController = TextEditingController();
+  TextEditingController eventNameTextController = TextEditingController();
+  TextEditingController hostNameTextController = TextEditingController();
+  TextEditingController dateTextController = TextEditingController();
+  TextEditingController daysTextController = TextEditingController();
+
 
   final certTypes = ["Participation", "Appreciation", "Achievement", "Excellence", "Award", "Recognition", "Completion", "Other"];
 
@@ -97,7 +102,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                 ),
-                Text(widget.ocrText),
+                SelectableText(widget.ocrText),
                 SizedBox(height: 16),
                 Padding(
                   padding: EdgeInsets.symmetric(vertical: 8, horizontal: 4),
@@ -106,7 +111,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
                   ),
                 ),
                 SimpleAutocompleteFormField<String>(
-                  initialValue: certificateType,
+                  controller: certificateTypeTextController,
                   decoration: InputDecoration(border: OutlineInputBorder()),
                   itemBuilder: (context, item) => Container(
                     padding: EdgeInsets.all(8),
@@ -121,8 +126,6 @@ class _ReviewScreenState extends State<ReviewScreen> {
                   suggestionsHeight: 250,
                   onSearch: (String search) async => search.isEmpty ? certTypes : certTypes.where((txt) => txt.toLowerCase().contains(search.toLowerCase())).toList(),
                   itemFromString: (string) => certTypes.singleWhere((txt) => txt == string.toLowerCase(), orElse: () => ''),
-                  onChanged: (value) => setState(() => certificateType = value!),
-                  onSaved: (value) => setState(() => certificateType = value!)
                 ),
                 SizedBox(height: 16,),
                 Padding(
@@ -132,7 +135,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
                   ),
                 ),
                 SimpleAutocompleteFormField<String>(
-                    initialValue: recipient,
+                    controller: recipientTextController,
                     decoration: InputDecoration(border: OutlineInputBorder()),
                     itemBuilder: (context, item) => Container(
                       padding: EdgeInsets.all(8),
@@ -147,8 +150,6 @@ class _ReviewScreenState extends State<ReviewScreen> {
                     suggestionsHeight: 300,
                     onSearch: (String search) async => search.isEmpty ? widget.scannedText : widget.scannedText.where((txt) => txt.toLowerCase().contains(search.toLowerCase())).toList(),
                     itemFromString: (string) => widget.scannedText.singleWhere((txt) => txt == string.toLowerCase(), orElse: () => ''),
-                    onChanged: (value) => setState(() => recipient = value!),
-                    onSaved: (value) => setState(() => recipient = value!)
                 ),
                 SizedBox(height: 16,),
                 Padding(
@@ -158,7 +159,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
                   ),
                 ),
                 SimpleAutocompleteFormField<String>(
-                    initialValue: eventName,
+                    controller: eventNameTextController,
                     decoration: InputDecoration(border: OutlineInputBorder()),
                     itemBuilder: (context, item) => Container(
                       padding: EdgeInsets.all(8),
@@ -173,8 +174,6 @@ class _ReviewScreenState extends State<ReviewScreen> {
                     suggestionsHeight: 300,
                     onSearch: (String search) async => search.isEmpty ? widget.scannedText : widget.scannedText.where((txt) => txt.toLowerCase().contains(search.toLowerCase())).toList(),
                     itemFromString: (string) => widget.scannedText.singleWhere((txt) => txt == string.toLowerCase(), orElse: () => ''),
-                    onChanged: (value) => setState(() => eventName = value!),
-                    onSaved: (value) => setState(() => eventName = value!)
                 ),
                 SizedBox(height: 16,),
                 Padding(
@@ -184,7 +183,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
                   ),
                 ),
                 SimpleAutocompleteFormField<String>(
-                    initialValue: hostName,
+                    controller: hostNameTextController,
                     decoration: InputDecoration(border: OutlineInputBorder()),
                     itemBuilder: (context, item) => Container(
                       padding: EdgeInsets.all(8),
@@ -199,8 +198,6 @@ class _ReviewScreenState extends State<ReviewScreen> {
                     suggestionsHeight: 300,
                     onSearch: (String search) async => search.isEmpty ? widget.scannedText : widget.scannedText.where((txt) => txt.toLowerCase().contains(search.toLowerCase())).toList(),
                     itemFromString: (string) => widget.scannedText.singleWhere((txt) => txt == string.toLowerCase(), orElse: () => ''),
-                    onChanged: (value) => setState(() => hostName = value!),
-                    onSaved: (value) => setState(() => hostName = value!)
                 ),
                 SizedBox(height: 16,),
                 Padding(
@@ -210,7 +207,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
                   ),
                 ),
                 SimpleAutocompleteFormField<String>(
-                    initialValue: date,
+                    controller: dateTextController,
                     decoration: InputDecoration(border: OutlineInputBorder()),
                     itemBuilder: (context, item) => Container(
                       padding: EdgeInsets.all(8),
@@ -225,8 +222,6 @@ class _ReviewScreenState extends State<ReviewScreen> {
                     suggestionsHeight: 300,
                     onSearch: (String search) async => search.isEmpty ? widget.scannedText : widget.scannedText.where((txt) => txt.toLowerCase().contains(search.toLowerCase())).toList(),
                     itemFromString: (string) => widget.scannedText.singleWhere((txt) => txt == string.toLowerCase(), orElse: () => ''),
-                    onChanged: (value) => setState(() => date = value!),
-                    onSaved: (value) => setState(() => date = value!)
                 ),
                 SizedBox(height: 16,),
                 Padding(
@@ -236,7 +231,7 @@ class _ReviewScreenState extends State<ReviewScreen> {
                   ),
                 ),
                 SimpleAutocompleteFormField<String>(
-                    initialValue: days,
+                    controller: daysTextController,
                     decoration: InputDecoration(border: OutlineInputBorder()),
                     itemBuilder: (context, item) => Container(
                       padding: EdgeInsets.all(8),
@@ -251,8 +246,6 @@ class _ReviewScreenState extends State<ReviewScreen> {
                     suggestionsHeight: 300,
                     onSearch: (String search) async => search.isEmpty ? widget.scannedText : widget.scannedText.where((txt) => txt.toLowerCase().contains(search.toLowerCase())).toList(),
                     itemFromString: (string) => widget.scannedText.singleWhere((txt) => txt == string.toLowerCase(), orElse: () => ''),
-                    onChanged: (value) => setState(() => days = value!),
-                    onSaved: (value) => setState(() => days = value!)
                 ),
                 SizedBox(height: 16,),
                 Padding(
@@ -284,9 +277,12 @@ class _ReviewScreenState extends State<ReviewScreen> {
     try {
       await refImgUpload.putFile(File(widget.image.path));
       var imgUrl = await refImgUpload.getDownloadURL();
-      var certificate = Certificate(userId: uId ?? "unknown", ocrText: widget.ocrText, type: certificateType, recipient: recipient, event: eventName, host: hostName, date: date, imgUrl: imgUrl, days: days);
+      var cId = Uuid().v4().replaceAll('-', '');
+      var certificate = Certificate(id: cId, userId: uId ?? "unknown", name: widget.kitUsr.name, dept: widget.kitUsr.dept, designation: widget.kitUsr.designation, ocrText: widget.ocrText, type: certificateTypeTextController.text, recipient: recipientTextController.text, event: eventNameTextController.text, host: hostNameTextController.text, date: dateTextController.text, imgUrl: imgUrl, days: daysTextController.text, createdAt: DateTime.now().toString());
 
-      await certificatesRef.add(certificate.toJson()).then((value) {
+
+
+      await certificatesRef.doc(cId).set(certificate.toJson()).then((value) {
         showSnakbar("Upload successful");
         Navigator.pop(context);
         Navigator.pop(context);
@@ -347,16 +343,16 @@ class _ReviewScreenState extends State<ReviewScreen> {
       print("$g : ${ocrTxt.substring(startIndex + l, endIndex)}");
       switch(g){
         case 1:
-          recipient = ocrTxt.substring(startIndex + l, endIndex);
+          recipientTextController.text = ocrTxt.substring(startIndex + l, endIndex);
           break;
         case 2:
-          eventName = ocrTxt.substring(startIndex + l, endIndex);
+          eventNameTextController.text = ocrTxt.substring(startIndex + l, endIndex);
           break;
         case 3:
-          hostName = ocrTxt.substring(startIndex + l, endIndex);
+          hostNameTextController.text = ocrTxt.substring(startIndex + l, endIndex);
           break;
         case 4:
-          date = ocrTxt.substring(startIndex + l, endIndex);
+          dateTextController.text = ocrTxt.substring(startIndex + l, endIndex);
           break;
         default:
           print("Last Index");
@@ -366,19 +362,19 @@ class _ReviewScreenState extends State<ReviewScreen> {
     var items = ocrTxt.toLowerCase().split(' ');
     if(items.contains('days')) {
       var d = items[items.indexOf('days') - 1];
-      days = d + ' Days';
+      daysTextController.text = d + ' Days';
     } else if(items.contains('week')) {
       var w = items[items.indexOf('week') - 1];
-      days = w + ' Week';
+      daysTextController.text = w + ' Week';
     } else if(items.contains('months')) {
       var m = items[items.indexOf('months') - 1];
-      days = m + ' Months';
+      daysTextController.text = m + ' Months';
     }
 
     print("Items: $items");
     if(ocrTxt.toLowerCase().contains('certificate of')) {
       var c = items[items.indexOf('certificate') + 2];
-      certificateType = c.capitalizeFirstLetter();
+      certificateTypeTextController.text = c.capitalizeFirstLetter();
     }
   }
 

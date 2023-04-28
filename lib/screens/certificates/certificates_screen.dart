@@ -35,16 +35,17 @@ class _CertificatesScreenState extends State<CertificatesScreen> {
                   itemCount: items?.length,
                   itemBuilder: (context, index){
                     var certificate = Certificate.fromJson(items![index] as Map<String, dynamic>);
-                    return GestureDetector(
-                      onTap: () {
-                        Navigator.push(context, MaterialPageRoute(builder: (context) => DetailScreen(certificate: certificate)));
-                      },
-                      child: Padding(
-                        padding: EdgeInsets.symmetric(vertical: 16),
-                        child: ListTile(
-                          title: Text(certificate.recipient),
-                          leading: Image.network(certificate.imgUrl),
-                        ),
+                    return Padding(
+                      padding: EdgeInsets.symmetric(vertical: 16),
+                      child: ListTile(
+                        onTap: () {
+                          Navigator.push(context, MaterialPageRoute(builder: (context) => DetailScreen(certificate: certificate)));
+                        },
+                        onLongPress: () {
+                          showDeleteAlertDialog(context, certificate);
+                        },
+                        title: Text(certificate.recipient),
+                        leading: Image.network(certificate.imgUrl),
                       ),
                     );
                   }
@@ -57,6 +58,48 @@ class _CertificatesScreenState extends State<CertificatesScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  void deleteDoc(Certificate cert) async {
+    await FirebaseFirestore.instance.collection('certificates').doc(cert.id).delete().then((value) {
+      print("Document Deleted");
+    });
+  }
+
+  void showDeleteAlertDialog(BuildContext context, Certificate cert) {
+
+    // set up the buttons
+    Widget cancelButton = TextButton(
+      child: Text("Cancel"),
+      onPressed:  () {
+        Navigator.of(context).pop();
+      },
+    );
+    Widget continueButton = TextButton(
+      child: Text("Delete", style: TextStyle(color: Colors.red),),
+      onPressed:  () {
+        Navigator.of(context).pop();
+        deleteDoc(cert);
+      },
+    );
+
+    // set up the AlertDialog
+    AlertDialog alert = AlertDialog(
+      title: Text("Delete Report"),
+      content: Text("Are you sure to delete this report permanently?"),
+      actions: [
+        cancelButton,
+        continueButton,
+      ],
+    );
+
+    // show the dialog
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
     );
   }
 }

@@ -19,11 +19,15 @@ class SignupScreen extends StatefulWidget {
 class _SignupScreenState extends State<SignupScreen> {
 
   TextEditingController _nameTextController = TextEditingController();
+  TextEditingController _deptTextController = TextEditingController();
+  TextEditingController _designationTextController = TextEditingController();
   TextEditingController _emailTextController = TextEditingController();
   TextEditingController _mobileTextController = TextEditingController();
   TextEditingController _passTextController = TextEditingController();
 
   final usersRef = FirebaseFirestore.instance.collection('users');
+
+  final departments = ["Computer Science & Engineering", "Biotech", "Civil", "Environment"];
 
   @override
   Widget build(BuildContext context) {
@@ -54,6 +58,36 @@ class _SignupScreenState extends State<SignupScreen> {
                 SizedBox(height: 24,),
                 reusableTextField("Full Name", Icons.person_outline, false, _nameTextController),
                 SizedBox(height: 24,),
+                DropdownButtonFormField(
+                  decoration: InputDecoration(
+                    prefixIcon: Icon(
+                      Icons.groups_outlined,
+                      color: Colors.white70,
+                    ),
+                    labelText: "Department",
+                    labelStyle: TextStyle(color: Colors.white.withOpacity(0.9)),
+                    filled: true,
+                    floatingLabelBehavior: FloatingLabelBehavior.never,
+                    fillColor: Colors.white.withOpacity(0.3),
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(30),
+                        borderSide: const BorderSide(width: 0, style: BorderStyle.none)
+                    ),
+                  ),
+                    items: departments.map<DropdownMenuItem<String>>((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(value,),
+                      );
+                    }).toList(),
+                    onChanged: (value) {
+                      setState(() {
+                        _deptTextController.text = value!;
+                      });
+                }),
+                SizedBox(height: 24,),
+                reusableTextField("Designation", Icons.leaderboard, false, _designationTextController),
+                SizedBox(height: 24,),
                 reusableTextField("Email Address", Icons.email_outlined, false, _emailTextController),
                 SizedBox(height: 24,),
                 reusableTextField("Mobile Number", Icons.phone, false, _mobileTextController),
@@ -63,17 +97,19 @@ class _SignupScreenState extends State<SignupScreen> {
                 authButton(context, false, () {
                   var name = _nameTextController.text;
                   var email = _emailTextController.text;
+                  var dept = _deptTextController.text;
+                  var desg = _designationTextController.text;
                   var num = _mobileTextController.text;
                   var pass = _passTextController.text;
-                  if(email != '' && pass != '') {
+                  if(email != '' && pass != '' && name != '' && dept != '' && desg != '' && num != '') {
                     FirebaseAuth.instance.createUserWithEmailAndPassword(email: email, password: pass).then((value) {
                       var uid = value.user?.uid;
-                      createUser(id: uid ?? num, name: name, email: email, mobile: num);
+                      createUser(id: uid ?? num, name: name, dept: dept, designation: desg, email: email, mobile: num);
                     }).onError((error, stackTrace) {
                       print("Signup Error ${error.toString()}");
                     });
                   } else {
-                    print("Error: Blank Fields");
+                    showSnakbar("Please fill all fields");
                   }
                 })
               ],
@@ -84,8 +120,8 @@ class _SignupScreenState extends State<SignupScreen> {
     );
   }
 
-  Future createUser({required String id, required String name, required String email, required String mobile}) async {
-    final user = EndUser(id: id, name: name, email: email, mobile: mobile);
+  Future createUser({required String id, required String name, required String dept, required String designation, required String email, required String mobile}) async {
+    final user = EndUser(id: id, role:"0", dept: dept, designation: designation, name: name, email: email, mobile: mobile);
     await usersRef.doc(id).set(user.toJson()).then((value) {
       showSnakbar("Signup successful, Welcome!");
       Navigator.push(context, MaterialPageRoute(builder: (context) => HomeScreen()));

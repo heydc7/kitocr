@@ -7,7 +7,9 @@ import 'package:google_ml_kit/google_ml_kit.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:kitocr/auth/login/login_screen.dart';
 import 'package:kitocr/models/end_user.dart';
+import 'package:kitocr/screens/certificates/admin_certificate_screen.dart';
 import 'package:kitocr/screens/certificates/certificates_screen.dart';
+import 'package:kitocr/screens/reports/reports_screen.dart';
 import 'package:kitocr/screens/review/review_screen.dart';
 import 'package:kitocr/utils/custom-widgets.dart';
 
@@ -27,7 +29,7 @@ class _HomeScreenState extends State<HomeScreen> {
   XFile? imageFile;
   List<String> scannedText = [];
 
-  var kitUsr = EndUser(id: "", name: "", email: "", mobile: "");
+  var kitUsr = EndUser(id: "", role: "", name: "", dept: "", designation: "", email: "", mobile: "");
   var collection = FirebaseFirestore.instance.collection('users');
   final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
 
@@ -95,11 +97,11 @@ class _HomeScreenState extends State<HomeScreen> {
                               SizedBox(height: 8,),
                               Padding(
                                 padding: EdgeInsets.symmetric(vertical: 8),
-                                child: Text("Mobile",
+                                child: Text("User Type",
                                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                                 ),
                               ),
-                              Text(kitUsr.mobile, style: TextStyle(fontSize: 16),),
+                              Text(kitUsr.role == "0" ? "User" : "Admin", style: TextStyle(fontSize: 16),),
                             ],
                           ),
                         ),
@@ -159,8 +161,28 @@ class _HomeScreenState extends State<HomeScreen> {
                   getImage(ImageSource.gallery);
                 }),
                 reusableButton(context, "View Certificates", (){
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => CertificatesScreen()));
+                  if(kitUsr.role == "0") {
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => CertificatesScreen()));
+                  } else {
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => AdminCertificateScreen()));
+                  }
                 }),
+                FutureBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+                  future: collection.doc(firebaseAuth.currentUser?.uid).get(),
+                  builder: (_, snapshot) {
+                    if (snapshot.hasError) return Text ('Unable to fetch user info');
+                    if (snapshot.hasData) {
+                      var data = snapshot.data!.data();
+                      kitUsr = EndUser.fromJson(data!);
+                      if(kitUsr.role == "1") {
+                        return reusableButton(context, "All Reports", (){
+                          Navigator.push(context, MaterialPageRoute(builder: (context) => ReportsScreen()));
+                        });
+                      }
+                    }
+                    return SizedBox(height: 8,);
+                  },
+                ),
                 SizedBox(height: 16,),
                 Spacer()
               ],
@@ -207,7 +229,7 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {
 
     });
-    Navigator.push(context, MaterialPageRoute(builder: (context) => ReviewScreen(image: image, ocrText: ocrText, scannedText: scannedText)));
+    Navigator.push(context, MaterialPageRoute(builder: (context) => ReviewScreen(image: image, ocrText: ocrText, scannedText: scannedText, kitUsr: kitUsr)));
   }
 
 }

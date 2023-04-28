@@ -58,6 +58,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   if(email != '' && pass != '') {
                     FirebaseAuth.instance.signInWithEmailAndPassword(email: email, password: pass).then((value) {
                       showSnakbar("Logged in successfully");
+                      FocusManager.instance.primaryFocus?.unfocus();
                       Navigator.push(context, MaterialPageRoute(builder: (context) => HomeScreen()));
                     }).onError((error, stackTrace) {
                       showSnakbar("Login Error: ${error.toString()}");
