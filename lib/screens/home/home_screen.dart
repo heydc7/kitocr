@@ -134,7 +134,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 Spacer(),
                 FutureBuilder<DocumentSnapshot<Map<String, dynamic>>>(
                   future: collection.doc(firebaseAuth.currentUser?.uid).get(),
-                  builder: (_, snapshot) {
+                  builder: (context, snapshot) {
                     if (snapshot.hasError) return Text ('Unable to fetch user info');
                     if (snapshot.hasData) {
                       var data = snapshot.data!.data();

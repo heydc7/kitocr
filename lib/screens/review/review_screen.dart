@@ -48,13 +48,13 @@ class _ReviewScreenState extends State<ReviewScreen> {
   final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
 
   // NAME
-  final group1 = ["certify that"];
+  final group1 = ["certify that", "awarded to"];
   // EVENT NAME
-  final group2 = ["has participated in", "has organized"];
+  final group2 = ["participated in", "has organized", "has attended", "participation in", "has contributed", "attended", "has presented", "participated"];
   // HOST NAME
-  final group3 = ["organized by"];
+  final group3 = ["organized by", "at", "arranged by", "hosted by", "conducted by", "under"];
   // DATE
-  final group4 = ["from"];
+  final group4 = ["from", "during", "held on"];
 
   var isLoading = false;
 

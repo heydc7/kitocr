@@ -70,6 +70,14 @@ class _DetailScreenState extends State<DetailScreen> {
                 SizedBox(height: 8,),
                 Padding(
                   padding: EdgeInsets.symmetric(vertical: 8),
+                  child: Text("Created By",
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                ),
+                Text(widget.certificate.name),
+                SizedBox(height: 8,),
+                Padding(
+                  padding: EdgeInsets.symmetric(vertical: 8),
                   child: Text("Date",
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),

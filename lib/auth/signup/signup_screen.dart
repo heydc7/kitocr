@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:kitocr/models/end_user.dart';
 import 'package:kitocr/models/end_user.dart';
 import 'package:kitocr/screens/home/home_screen.dart';
+import 'package:simple_autocomplete_formfield/simple_autocomplete_formfield.dart';
 
 import '../../utils/custom-widgets.dart';
 import '../../utils/utils.dart';
@@ -27,7 +28,8 @@ class _SignupScreenState extends State<SignupScreen> {
 
   final usersRef = FirebaseFirestore.instance.collection('users');
 
-  final departments = ["Computer Science & Engineering", "Biotech", "Civil", "Environment"];
+  final departments = ["Biotechnology Engineering", "Civil Engineering", "Computer & Science Engineering", "Electrical Engineering", "Electronics Engineering", "Electronics & Telecommunication Engineering", "Environmental Engineering", "Mechanical Engineering", "Basic Sciences & Humanities", "Production Engineering"];
+  final positions = ["Assistant Professor", "Associate Professor", "Head of Department"];
 
   @override
   Widget build(BuildContext context) {
@@ -58,14 +60,16 @@ class _SignupScreenState extends State<SignupScreen> {
                 SizedBox(height: 24,),
                 reusableTextField("Full Name", Icons.person_outline, false, _nameTextController),
                 SizedBox(height: 24,),
-                DropdownButtonFormField(
+                SimpleAutocompleteFormField<String>(
+                  controller: _deptTextController,
+                  style: TextStyle(color: Colors.white),
                   decoration: InputDecoration(
                     prefixIcon: Icon(
                       Icons.groups_outlined,
                       color: Colors.white70,
                     ),
                     labelText: "Department",
-                    labelStyle: TextStyle(color: Colors.white.withOpacity(0.9)),
+                    labelStyle: TextStyle(color: Colors.white),
                     filled: true,
                     floatingLabelBehavior: FloatingLabelBehavior.never,
                     fillColor: Colors.white.withOpacity(0.3),
@@ -74,19 +78,53 @@ class _SignupScreenState extends State<SignupScreen> {
                         borderSide: const BorderSide(width: 0, style: BorderStyle.none)
                     ),
                   ),
-                    items: departments.map<DropdownMenuItem<String>>((String value) {
-                      return DropdownMenuItem<String>(
-                        value: value,
-                        child: Text(value,),
-                      );
-                    }).toList(),
-                    onChanged: (value) {
-                      setState(() {
-                        _deptTextController.text = value!;
-                      });
-                }),
+                  itemBuilder: (context, item) => Container(
+                    padding: EdgeInsets.all(8),
+                    margin: EdgeInsets.symmetric(vertical: 4),
+                    decoration: BoxDecoration(
+                        color: Colors.white12,
+                        borderRadius: BorderRadius.circular(12)
+                    ),
+                    child: Text(item!, style: TextStyle(color: Colors.white),),
+                  ),
+                  maxSuggestions: 30,
+                  suggestionsHeight: 200,
+                  onSearch: (String search) async => search.isEmpty ? departments : departments.where((txt) => txt.toLowerCase().contains(search.toLowerCase())).toList(),
+                  itemFromString: (string) => departments.singleWhere((txt) => txt == string.toLowerCase(), orElse: () => ''),
+                ),
                 SizedBox(height: 24,),
-                reusableTextField("Designation", Icons.leaderboard, false, _designationTextController),
+                SimpleAutocompleteFormField<String>(
+                  controller: _designationTextController,
+                  style: TextStyle(color: Colors.white),
+                  decoration: InputDecoration(
+                    prefixIcon: Icon(
+                      Icons.groups_outlined,
+                      color: Colors.white70,
+                    ),
+                    labelText: "Designation",
+                    labelStyle: TextStyle(color: Colors.white),
+                    filled: true,
+                    floatingLabelBehavior: FloatingLabelBehavior.never,
+                    fillColor: Colors.white.withOpacity(0.3),
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(30),
+                        borderSide: const BorderSide(width: 0, style: BorderStyle.none)
+                    ),
+                  ),
+                  itemBuilder: (context, item) => Container(
+                    padding: EdgeInsets.all(8),
+                    margin: EdgeInsets.symmetric(vertical: 4),
+                    decoration: BoxDecoration(
+                        color: Colors.white12,
+                        borderRadius: BorderRadius.circular(12)
+                    ),
+                    child: Text(item!, style: TextStyle(color: Colors.white),),
+                  ),
+                  maxSuggestions: 30,
+                  suggestionsHeight: 120,
+                  onSearch: (String search) async => search.isEmpty ? positions : positions.where((txt) => txt.toLowerCase().contains(search.toLowerCase())).toList(),
+                  itemFromString: (string) => positions.singleWhere((txt) => txt == string.toLowerCase(), orElse: () => ''),
+                ),
                 SizedBox(height: 24,),
                 reusableTextField("Email Address", Icons.email_outlined, false, _emailTextController),
                 SizedBox(height: 24,),

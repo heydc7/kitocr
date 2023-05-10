@@ -44,11 +44,19 @@ class _AdminCertificateScreenState extends State<AdminCertificateScreen> {
         certificates = value.docs.map((doc) => Certificate.fromJson(doc.data())).toList();
         allCertificates = certificates;
         for(var c in certificates) {
-          users.add(FilterItemModel(filterTitle: c.name, filterKey: c.name));
-          depts.add(FilterItemModel(filterTitle: c.dept, filterKey: c.dept));
-          desgn.add(FilterItemModel(filterTitle: c.designation, filterKey: c.designation));
+          var userModel = FilterItemModel(filterTitle: c.name, filterKey: c.name);
+          var deptModel = FilterItemModel(filterTitle: c.dept, filterKey: c.dept);
+          var desgModel = FilterItemModel(filterTitle: c.designation, filterKey: c.designation);
+          if(!users.contains(userModel)) {
+            users.add(userModel);
+          }
+          if(!depts.contains(deptModel)) {
+            depts.add(deptModel);
+          }
+          if(!desgn.contains(desgModel)) {
+            desgn.add(desgModel);
+          }
         }
-        users.add(FilterItemModel(filterTitle: "Demo", filterKey: "demo"));
       });
       print(certificates.length);
     });
