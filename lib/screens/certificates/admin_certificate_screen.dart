@@ -172,8 +172,8 @@ class _AdminCertificateScreenState extends State<AdminCertificateScreen> {
                             FilterListModel(
                               filterOptions: [
                                 FilterItemModel(filterTitle: "1 Month", filterKey: "1M"),
-                                FilterItemModel(filterTitle: "3 Months", filterKey: "6M"),
-                                FilterItemModel(filterTitle: "6 Months", filterKey: "9M"),
+                                FilterItemModel(filterTitle: "3 Months", filterKey: "3M"),
+                                FilterItemModel(filterTitle: "6 Months", filterKey: "6M"),
                                 FilterItemModel(filterTitle: "12 Months", filterKey: "12M")
                               ],
                               previousApplied: [],
